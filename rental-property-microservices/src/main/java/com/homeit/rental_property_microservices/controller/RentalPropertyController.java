@@ -107,4 +107,9 @@ public class RentalPropertyController {
                 ("This was a sample unhandled runtime exception");
     }
 
+    @GetMapping("/thread-model")
+    public String getThreadName() {
+        return Thread.currentThread().toString();
+    }
+
 }
