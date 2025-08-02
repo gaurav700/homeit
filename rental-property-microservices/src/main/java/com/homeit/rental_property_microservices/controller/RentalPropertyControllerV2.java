@@ -33,6 +33,8 @@ public class RentalPropertyControllerV2 {
     }
 
 
+
+
     @GetMapping(
         value = "/{id}",
         produces = "application/json")
