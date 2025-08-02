@@ -1,6 +1,8 @@
 package com.homeit.rental_property_microservices.service;
 
 import com.homeit.rental_property_microservices.dto.RentalPropertyDTO;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,6 +14,8 @@ public interface RentalPropertyService {
     List<RentalPropertyDTO> getAllProperties();
 
     Optional<RentalPropertyDTO> get(UUID id);
+
+    Page<RentalPropertyDTO> getPagedProperties(int page, int size);
 
     RentalPropertyDTO create(RentalPropertyDTO property);
 

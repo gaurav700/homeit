@@ -3,13 +3,19 @@ package com.homeit.rental_property_microservices.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "rental_properties")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RentalProperty {
     @Id
     @Column(updatable = false, nullable = false)
