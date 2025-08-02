@@ -1,0 +1,41 @@
+package com.homeit.rental_property_microservices.entity;
+
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+
+import java.util.UUID;
+
+@Entity
+@Table(name = "rental_properties")
+@Data
+public class RentalProperty {
+    @Id
+    @Column(updatable = false, nullable = false)
+    private UUID id;
+
+    @NotNull(message = "Landlord id is required")
+    @Column(nullable = false)
+    private UUID landlordID;
+
+    @NotEmpty(message = "Name is required")
+    @Column(nullable = false)
+    private String name;
+
+    @Lob
+    @Convert(converter = AddressConverter.class)
+    @Column(columnDefinition = "TEXT")
+    private Address address;
+
+    @NotNull(message = "Rent is required")
+    @Column(nullable = false)
+    private Double rent;
+
+    @PrePersist
+    protected void onCreate() {
+        if (id == null) {
+            id = UUID.randomUUID();
+        }
+    }
+}
