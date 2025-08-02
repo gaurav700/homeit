@@ -2,6 +2,8 @@ package com.homeit.rental_property_microservices.controller;
 
 import com.homeit.rental_property_microservices.dto.RentalPropertyDTO;
 import com.homeit.rental_property_microservices.service.RentalPropertyService;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -14,10 +16,17 @@ import java.util.UUID;
 @RequestMapping("api/v1/rental-properties")
 @Validated
 public class RentalPropertyController {
-    private final RentalPropertyService rentalPropertyService;
+    private final RentalPropertyService mapRentalPropertyService;
+    private final RentalPropertyService jpaRentalPropertyService;
 
-    public RentalPropertyController(RentalPropertyService rentalPropertyService) {
-        this.rentalPropertyService = rentalPropertyService;
+    public RentalPropertyController(
+            @Qualifier("hashMapRentalPropertyService") RentalPropertyService mapRentalPropertyService,
+            @Qualifier("jpaRentalPropertyService") RentalPropertyService jpaRentalPropertyService)
+    {
+        this.mapRentalPropertyService =
+                mapRentalPropertyService;
+        this.jpaRentalPropertyService =
+                jpaRentalPropertyService;
     }
 
     @GetMapping(
@@ -33,7 +42,7 @@ public class RentalPropertyController {
             produces = "application/json")
     public ResponseEntity<RentalPropertyDTO> getPropertyById(
             @PathVariable UUID id){
-        return rentalPropertyService.get(id)
+        return jpaRentalPropertyService.get(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
@@ -43,7 +52,7 @@ public class RentalPropertyController {
             produces = "application/json")
     public ResponseEntity<RentalPropertyDTO> createProperty(
             @RequestBody RentalPropertyDTO property){
-        RentalPropertyDTO createdRentalProperty = rentalPropertyService.create(property);
+        RentalPropertyDTO createdRentalProperty = jpaRentalPropertyService.create(property);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRentalProperty);
     }
 
@@ -54,7 +63,7 @@ public class RentalPropertyController {
     public ResponseEntity<RentalPropertyDTO> updateProperty(
             @PathVariable UUID id,
             @RequestBody RentalPropertyDTO property){
-        return rentalPropertyService.update(id, property)
+        return jpaRentalPropertyService.update(id, property)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
@@ -66,7 +75,7 @@ public class RentalPropertyController {
     public ResponseEntity<RentalPropertyDTO> patchProperty(
             @PathVariable UUID id,
             @RequestBody RentalPropertyDTO partialUpdate){
-        return rentalPropertyService
+        return jpaRentalPropertyService
                 .updateSomeFields(id, partialUpdate)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
@@ -75,7 +84,7 @@ public class RentalPropertyController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProperty(
             @PathVariable UUID id) {
-        return rentalPropertyService
+        return jpaRentalPropertyService
                 .delete(id)
                 .map(opt -> ResponseEntity.noContent().<Void>build())
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -90,14 +99,14 @@ public class RentalPropertyController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String zipCode) {
-        return ResponseEntity.ok(rentalPropertyService.search(
+        return ResponseEntity.ok(jpaRentalPropertyService.search(
                 name, address, city,country,zipCode));
     }
 
     @GetMapping(produces = "application/json")
     public ResponseEntity<List<RentalPropertyDTO>> getAllProperties() {
         return ResponseEntity.ok()
-                .body(rentalPropertyService.getAllProperties());
+                .body(jpaRentalPropertyService.getAllProperties());
     }
 
 
@@ -110,6 +119,17 @@ public class RentalPropertyController {
     @GetMapping("/thread-model")
     public String getThreadName() {
         return Thread.currentThread().toString();
+    }
+
+    @GetMapping(produces = "application/json")
+    public ResponseEntity<Page<RentalPropertyDTO>>
+    getAllProperties(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok()
+                .body(jpaRentalPropertyService
+                        .getPagedProperties(page, size));
     }
 
 }

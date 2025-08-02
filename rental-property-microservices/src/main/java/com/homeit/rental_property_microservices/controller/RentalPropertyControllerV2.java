@@ -4,6 +4,7 @@ import com.homeit.rental_property_microservices.controller.utils.RentalPropertyH
 import com.homeit.rental_property_microservices.dto.descriptors.PropertiesCollectionDescriptor;
 import com.homeit.rental_property_microservices.dto.descriptors.RentalPropertyDescriptor;
 import com.homeit.rental_property_microservices.service.RentalPropertyService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,22 +19,26 @@ import java.util.UUID;
 @Validated
 public class RentalPropertyControllerV2 {
 
-    private final RentalPropertyService rentalPropertyService;
     private final RentalPropertyHyperMediaUtils rentalPropertyHyperMediaUtils;
+    private final RentalPropertyService mapRentalPropertyService;
+    private final RentalPropertyService jpaRentalPropertyService;
 
     public RentalPropertyControllerV2(
-            RentalPropertyService rentalPropertyService,
+            @Qualifier("hashMapRentalPropertyService") RentalPropertyService mapRentalPropertyService,
+            @Qualifier("jpaRentalPropertyService") RentalPropertyService jpaRentalPropertyService,
             RentalPropertyHyperMediaUtils rentalPropertyHyperMediaUtils) {
-        this.rentalPropertyService = rentalPropertyService;
         this.rentalPropertyHyperMediaUtils = rentalPropertyHyperMediaUtils;
+        this.mapRentalPropertyService = mapRentalPropertyService;
+        this.jpaRentalPropertyService = jpaRentalPropertyService;
     }
+
 
     @GetMapping(
         value = "/{id}",
         produces = "application/json")
     public ResponseEntity<RentalPropertyDescriptor> getPropertyById(
         @PathVariable UUID id) {
-        return rentalPropertyService.get(id)
+        return jpaRentalPropertyService.get(id)
             .map(rentalPropertyHyperMediaUtils::describeRentalProperty)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -45,7 +50,7 @@ public class RentalPropertyControllerV2 {
         return Optional.ofNullable(
                 rentalPropertyHyperMediaUtils
                     .describeRentalPropertyCollection(
-                        rentalPropertyService.getAllProperties()))
+                            jpaRentalPropertyService.getAllProperties()))
             .map( describedCollection ->
                 ResponseEntity.ok().body(describedCollection))
             .orElse(ResponseEntity.noContent().build());

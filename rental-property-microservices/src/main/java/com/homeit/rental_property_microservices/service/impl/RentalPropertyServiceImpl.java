@@ -2,6 +2,7 @@ package com.homeit.rental_property_microservices.service.impl;
 
 import com.homeit.rental_property_microservices.dto.RentalPropertyDTO;
 import com.homeit.rental_property_microservices.service.RentalPropertyService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Qualifier("hashMapRentalPropertyService")
 public class RentalPropertyServiceImpl implements RentalPropertyService {
 
     private final Map<UUID, RentalPropertyDTO> rentalProperties = new HashMap<>();
