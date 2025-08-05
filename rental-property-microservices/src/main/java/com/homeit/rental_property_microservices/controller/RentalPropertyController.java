@@ -2,6 +2,7 @@ package com.homeit.rental_property_microservices.controller;
 
 import com.homeit.rental_property_microservices.dto.RentalPropertyDTO;
 import com.homeit.rental_property_microservices.service.RentalPropertyService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -11,49 +12,47 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
 @RestController
-@RequestMapping("api/v1/rental-properties")
+@RequestMapping("/api/v1/rental-properties")
 @Validated
 public class RentalPropertyController {
-    private final RentalPropertyService mapRentalPropertyService;
+
     private final RentalPropertyService jpaRentalPropertyService;
+    private final RentalPropertyService jdbcRentalPropertyService;
+    private final RentalPropertyService entityManagerRentalPropertyService;
 
     public RentalPropertyController(
-            @Qualifier("hashMapRentalPropertyService") RentalPropertyService mapRentalPropertyService,
-            @Qualifier("jpaRentalPropertyService") RentalPropertyService jpaRentalPropertyService)
-    {
-        this.mapRentalPropertyService =
-                mapRentalPropertyService;
-        this.jpaRentalPropertyService =
-                jpaRentalPropertyService;
+            @Qualifier("jpaRentalPropertyService") RentalPropertyService jpaRentalPropertyService,
+            @Qualifier("jdbcRentalPropertyService") RentalPropertyService jdbcRentalPropertyService,
+            @Qualifier("entityManagerRentalPropertyService") RentalPropertyService entityManagerRentalPropertyService) {
+        this.jpaRentalPropertyService = jpaRentalPropertyService;
+        this.jdbcRentalPropertyService = jdbcRentalPropertyService;
+        this.entityManagerRentalPropertyService = entityManagerRentalPropertyService;
     }
 
-    @GetMapping(
-            value = "/headers",
-            produces = "application/json")
-    public ResponseEntity<String> getHeaderInfo(
-            @RequestHeader("User-Agent") String userAgent) {
-        return ResponseEntity.ok("User-Agent: " + userAgent);
-    }
 
     @GetMapping(
             value = "/{id}",
             produces = "application/json")
     public ResponseEntity<RentalPropertyDTO> getPropertyById(
-            @PathVariable UUID id){
+            @PathVariable UUID id) {
         return jpaRentalPropertyService.get(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(null));
     }
 
     @PostMapping(
             consumes = "application/json",
             produces = "application/json")
     public ResponseEntity<RentalPropertyDTO> createProperty(
-            @RequestBody RentalPropertyDTO property){
-        RentalPropertyDTO createdRentalProperty = jpaRentalPropertyService.create(property);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdRentalProperty);
+            @Valid @RequestBody RentalPropertyDTO property) {
+
+        RentalPropertyDTO createdRentalProperty
+                = jpaRentalPropertyService.create(property);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(createdRentalProperty);
     }
 
     @PutMapping(
@@ -62,10 +61,13 @@ public class RentalPropertyController {
             produces = "application/json")
     public ResponseEntity<RentalPropertyDTO> updateProperty(
             @PathVariable UUID id,
-            @RequestBody RentalPropertyDTO property){
-        return jpaRentalPropertyService.update(id, property)
+            @Valid @RequestBody RentalPropertyDTO updatedProperty) {
+
+        return jpaRentalPropertyService
+                .update(id, updatedProperty)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(null));
     }
 
     @PatchMapping(
@@ -74,20 +76,24 @@ public class RentalPropertyController {
             produces = "application/json")
     public ResponseEntity<RentalPropertyDTO> patchProperty(
             @PathVariable UUID id,
-            @RequestBody RentalPropertyDTO partialUpdate){
+            @RequestBody RentalPropertyDTO partialUpdate) {
+
         return jpaRentalPropertyService
                 .updateSomeFields(id, partialUpdate)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(null));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProperty(
-            @PathVariable UUID id) {
-        return jpaRentalPropertyService
+    public ResponseEntity<Void> deleteProperty(@PathVariable UUID id) {
+        return entityManagerRentalPropertyService
                 .delete(id)
-                .map(opt -> ResponseEntity.noContent().<Void>build())
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+                .map(opt ->
+                        ResponseEntity.noContent()
+                                .<Void>build())
+                .orElse(ResponseEntity
+                        .status(HttpStatus.NOT_FOUND).build());
     }
 
     @GetMapping(
@@ -99,16 +105,28 @@ public class RentalPropertyController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String zipCode) {
-        return ResponseEntity.ok(jpaRentalPropertyService.search(
+
+        return ResponseEntity.ok(jdbcRentalPropertyService.search(
                 name, address, city,country,zipCode));
     }
 
-    @GetMapping(produces = "application/json")
-    public ResponseEntity<List<RentalPropertyDTO>> getAllProperties() {
-        return ResponseEntity.ok()
-                .body(jpaRentalPropertyService.getAllProperties());
+    @GetMapping(
+            value = "/headers",
+            produces = "application/json")
+    public ResponseEntity<String> getHeaderInfo(
+            @RequestHeader("User-Agent") String userAgent) {
+        return ResponseEntity.ok("User-Agent: " + userAgent);
     }
 
+
+    @GetMapping(produces = "application/json")
+    public ResponseEntity<Page<RentalPropertyDTO>> getAllProperties(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok()
+                .body(jpaRentalPropertyService.getPagedProperties(page, size));
+    }
 
     @GetMapping(value = "/error")
     public ResponseEntity<List<RentalPropertyDTO>> runtimeExceptionSample() {
@@ -120,16 +138,4 @@ public class RentalPropertyController {
     public String getThreadName() {
         return Thread.currentThread().toString();
     }
-
-    @GetMapping(produces = "application/json")
-    public ResponseEntity<Page<RentalPropertyDTO>>
-    getAllProperties(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        return ResponseEntity.ok()
-                .body(jpaRentalPropertyService
-                        .getPagedProperties(page, size));
-    }
-
 }

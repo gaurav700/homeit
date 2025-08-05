@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,8 @@ import java.util.UUID;
 
 @Service
 @Qualifier("entityManagerRentalPropertyService")
-@RequiredArgsConstructor
 public class RentalPropertyServiceEntityManagerImpl implements RentalPropertyService {
-
+    @Autowired
     private EntityManagerFactory entityManagerFactory;
 
     @Override

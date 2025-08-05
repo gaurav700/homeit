@@ -6,6 +6,7 @@ import com.homeit.rental_property_microservices.repository.RentalPropertyJpaRepo
 import com.homeit.rental_property_microservices.service.RentalPropertyService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,11 +18,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Qualifier("jpaRentalPropertyService")
 public class RentalPropertyServiceJpaImpl implements RentalPropertyService {
 
+    @Autowired
     private RentalPropertyJpaRepository rentalPropertyJpaRepository;
+
+
 
     @Override
     public List<RentalPropertyDTO> getAllProperties() {

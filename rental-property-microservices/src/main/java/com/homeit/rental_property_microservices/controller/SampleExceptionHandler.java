@@ -1,5 +1,5 @@
 package com.homeit.rental_property_microservices.controller;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -10,24 +10,26 @@ import java.net.URI;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
+@Slf4j
 public class SampleExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ProblemDetail>
-        handleGenericException(RuntimeException ex) {
-            ProblemDetail problemDetail =
+    handleGenericException(RuntimeException ex) {
+        log.error("exception: ", ex);
+        ProblemDetail problemDetail =
                 ProblemDetail.forStatus(
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+                        HttpStatus.INTERNAL_SERVER_ERROR);
 
-            problemDetail.setTitle("Customized Internal Server Error");
-            problemDetail.setDetail("An unexpected error occurred: "
-                    + ex.getMessage());
-            problemDetail.setInstance(
+        problemDetail.setTitle("Customized Internal Server Error");
+        problemDetail.setDetail("An unexpected error occurred: "
+                + ex.getMessage());
+        problemDetail.setInstance(
                 URI.create("/api/v1/rental-properties/error"));
-            problemDetail.setProperty("timestamp",
+        problemDetail.setProperty("timestamp",
                 LocalDateTime.now().toString());
 
-            return new ResponseEntity<>(problemDetail,
+        return new ResponseEntity<>(problemDetail,
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

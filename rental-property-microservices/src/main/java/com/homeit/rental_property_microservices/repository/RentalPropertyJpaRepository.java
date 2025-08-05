@@ -4,10 +4,11 @@ import com.homeit.rental_property_microservices.entity.RentalProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
-
+@Repository
 public interface RentalPropertyJpaRepository extends JpaRepository<RentalProperty, UUID> {
     // Find all properties by landlord ID
     List<RentalProperty> findByLandlordID(UUID landlordID);

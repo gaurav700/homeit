@@ -11,10 +11,16 @@ public class RentalPropertyMicroservicesApplication {
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication((RentalPropertyMicroservicesApplication.class));
 
-
+		virtualThreads(app);
 		databaseProperties(app);
 		app.run(args);
 	}
+
+	private static void virtualThreads(SpringApplication app) {
+		app.setDefaultProperties(
+				Map.of("spring.threads.virtual.enabled", "true"));
+	}
+
 
 	private static void databaseProperties(SpringApplication app) {
 		// # H2 Database configuration in PostgreSQL mode

@@ -19,6 +19,7 @@ import java.util.UUID;
 @Validated
 public class RentalPropertyControllerV2 {
 
+
     private final RentalPropertyHyperMediaUtils rentalPropertyHyperMediaUtils;
     private final RentalPropertyService mapRentalPropertyService;
     private final RentalPropertyService jpaRentalPropertyService;
@@ -33,29 +34,27 @@ public class RentalPropertyControllerV2 {
     }
 
 
-
-
     @GetMapping(
-        value = "/{id}",
-        produces = "application/json")
+            value = "/{id}",
+            produces = "application/json")
     public ResponseEntity<RentalPropertyDescriptor> getPropertyById(
-        @PathVariable UUID id) {
+            @PathVariable UUID id) {
         return jpaRentalPropertyService.get(id)
-            .map(rentalPropertyHyperMediaUtils::describeRentalProperty)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(null));
+                .map(rentalPropertyHyperMediaUtils::describeRentalProperty)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(null));
     }
 
     @GetMapping(produces = "application/json")
     public ResponseEntity<PropertiesCollectionDescriptor> getAllProperties() {
         return Optional.ofNullable(
-                rentalPropertyHyperMediaUtils
-                    .describeRentalPropertyCollection(
-                            jpaRentalPropertyService.getAllProperties()))
-            .map( describedCollection ->
-                ResponseEntity.ok().body(describedCollection))
-            .orElse(ResponseEntity.noContent().build());
+                        rentalPropertyHyperMediaUtils
+                                .describeRentalPropertyCollection(
+                                        jpaRentalPropertyService.getAllProperties()))
+                .map( describedCollection ->
+                        ResponseEntity.ok().body(describedCollection))
+                .orElse(ResponseEntity.noContent().build());
     }
 
 }
