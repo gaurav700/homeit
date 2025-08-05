@@ -4,6 +4,7 @@ import com.homeit.rental_property_microservices.dto.RentalPropertyDTO;
 import com.homeit.rental_property_microservices.dto.utils.RentalPropertyConverter;
 import com.homeit.rental_property_microservices.repository.RentalPropertyJpaRepository;
 import com.homeit.rental_property_microservices.service.RentalPropertyService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -49,6 +50,7 @@ public class RentalPropertyServiceJpaImpl implements RentalPropertyService {
     }
 
     @Override
+    @Transactional
     public Optional<RentalPropertyDTO> update(UUID id, RentalPropertyDTO updatedProperty) {
         if(rentalPropertyJpaRepository.existsById(id)){
             return Optional.ofNullable(
