@@ -92,7 +92,7 @@ public class RentalPropertyServiceJpaImpl implements RentalPropertyService {
     }
 
     @Override
-    public Optional<RentalPropertyDTO> delete(UUID id) {
+    public Optional<RentalPropertyDTO> delete(UUID id, String userId) {
         Optional<RentalPropertyDTO> found = get(id);
         rentalPropertyJpaRepository.deleteById(id);
         return found;

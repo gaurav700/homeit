@@ -23,7 +23,7 @@ public interface RentalPropertyService {
 
     Optional<RentalPropertyDTO> updateSomeFields(UUID id, RentalPropertyDTO partialUpdate);
 
-    Optional<RentalPropertyDTO> delete(UUID id);
+    Optional<RentalPropertyDTO> delete(UUID id, String userId);
 
     List<RentalPropertyDTO> search(String name, String address, String city, String country, String zipCode);
 }

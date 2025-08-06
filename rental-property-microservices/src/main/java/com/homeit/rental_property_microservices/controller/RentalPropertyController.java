@@ -7,9 +7,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 @RestController
@@ -34,6 +38,7 @@ public class RentalPropertyController {
     @GetMapping(
             value = "/{id}",
             produces = "application/json")
+    @PreAuthorize("hasAuthority('SCOPE_rental_properties:read')")
     public ResponseEntity<RentalPropertyDTO> getPropertyById(
             @PathVariable UUID id) {
         return jpaRentalPropertyService.get(id)
@@ -45,6 +50,7 @@ public class RentalPropertyController {
     @PostMapping(
             consumes = "application/json",
             produces = "application/json")
+    @PreAuthorize("hasAuthority('SCOPE_rental_properties:write')")
     public ResponseEntity<RentalPropertyDTO> createProperty(
             @Valid @RequestBody RentalPropertyDTO property) {
 
@@ -86,9 +92,13 @@ public class RentalPropertyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProperty(@PathVariable UUID id) {
+    @PreAuthorize("hasAuthority('SCOPE_rental_properties:read')")
+    public ResponseEntity<Void> deleteProperty(@PathVariable UUID id, Authentication authentication) throws ParseException {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String userId = jwt.getClaim("sub");
+
         return entityManagerRentalPropertyService
-                .delete(id)
+                .delete(id, userId)
                 .map(opt ->
                         ResponseEntity.noContent()
                                 .<Void>build())

@@ -62,7 +62,7 @@ public class RentalPropertyServiceJdbcImpl implements RentalPropertyService {
     }
 
     @Override
-    public Optional<RentalPropertyDTO> delete(UUID id) {
+    public Optional<RentalPropertyDTO> delete(UUID id, String userId) {
         return Optional.empty();
     }
 

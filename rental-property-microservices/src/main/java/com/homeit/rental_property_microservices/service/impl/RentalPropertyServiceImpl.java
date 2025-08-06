@@ -77,7 +77,7 @@ public class RentalPropertyServiceImpl implements RentalPropertyService {
     }
 
     @Override
-    public Optional<RentalPropertyDTO> delete(UUID id) {
+    public Optional<RentalPropertyDTO> delete(UUID id, String userId) {
         return Optional.ofNullable(rentalProperties.remove(id));
     }
 
