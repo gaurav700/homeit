@@ -45,11 +45,13 @@ public class SampleExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ProblemDetail> handleGenericException(RuntimeException ex) {
         log.error("exception: ", ex);
-        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        pd.setTitle("Customized Internal Server Error");
-        pd.setDetail("An unexpected error occurred: " + ex.getMessage());
-        pd.setInstance(URI.create("/api/v1/rental-properties/error"));
-        pd.setProperty("timestamp", LocalDateTime.now().toString());
-        return new ResponseEntity<>(pd, HttpStatus.INTERNAL_SERVER_ERROR);
+        ProblemDetail problemDetail =ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        problemDetail.setTitle("Customized Internal Server Error");
+        problemDetail.setDetail("An unexpected error occurred: "+ ex.getMessage());
+        problemDetail.setInstance(URI.create("/api/v1/rental-properties/error"));
+        problemDetail.setProperty("timestamp",LocalDateTime.now().toString());
+        log.debug("The resulting error object: {}",problemDetail);
+        return new ResponseEntity<>(problemDetail,HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }
