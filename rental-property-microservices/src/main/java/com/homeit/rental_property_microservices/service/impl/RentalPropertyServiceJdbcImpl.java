@@ -2,6 +2,7 @@ package com.homeit.rental_property_microservices.service.impl;
 
 import com.homeit.rental_property_microservices.dto.RentalPropertyDTO;
 import com.homeit.rental_property_microservices.service.RentalPropertyService;
+import com.homeit.rental_property_microservices.service.ScoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,12 +18,9 @@ import java.util.UUID;
 
 @Service
 @Qualifier("jdbcRentalPropertyService")
-public class RentalPropertyServiceJdbcImpl implements RentalPropertyService {
+public class RentalPropertyServiceJdbcImpl implements RentalPropertyService, ScoreService{
 
-    @Autowired
     private final NamedParameterJdbcTemplate jdbcTemplate;
-
-    @Autowired
     private final RentalPropertyRowMapper rentalPropertyRowMapper;
 
     public RentalPropertyServiceJdbcImpl(NamedParameterJdbcTemplate jdbcTemplate, RentalPropertyRowMapper rentalPropertyRowMapper) {
@@ -30,47 +28,45 @@ public class RentalPropertyServiceJdbcImpl implements RentalPropertyService {
         this.rentalPropertyRowMapper = rentalPropertyRowMapper;
     }
 
-
     @Override
     public List<RentalPropertyDTO> getAllProperties() {
-        return List.of();
-    }
-
-    @Override
-    public Optional<RentalPropertyDTO> get(UUID id) {
-        return Optional.empty();
+        throw new UnsupportedOperationException("Not implemented, please use the RentalPropertyJpaImpl bean");
     }
 
     @Override
     public Page<RentalPropertyDTO> getPagedProperties(int page, int size) {
-        return null;
+        throw new UnsupportedOperationException("Not implemented, please use the RentalPropertyJpaImpl bean");
+    }
+
+    @Override
+    public Optional<RentalPropertyDTO> get(UUID id) {
+        throw new UnsupportedOperationException("Not implemented, please use the RentalPropertyJpaImpl bean");
     }
 
     @Override
     public RentalPropertyDTO create(RentalPropertyDTO property) {
-        return null;
+        throw new UnsupportedOperationException("Not implemented, please use the RentalPropertyJpaImpl bean");
     }
 
     @Override
     public Optional<RentalPropertyDTO> update(UUID id, RentalPropertyDTO updatedProperty) {
-        return Optional.empty();
+        throw new UnsupportedOperationException("Not implemented, please use the RentalPropertyJpaImpl bean");
     }
 
     @Override
     public Optional<RentalPropertyDTO> updateSomeFields(UUID id, RentalPropertyDTO partialUpdate) {
-        return Optional.empty();
+        throw new UnsupportedOperationException("Not implemented, please use the RentalPropertyJpaImpl bean");
     }
 
     @Override
-    public Optional<RentalPropertyDTO> delete(UUID id, String userId) {
-        return Optional.empty();
+    public Optional<RentalPropertyDTO> delete(UUID id, String userID) {
+        throw new UnsupportedOperationException("Not implemented, please use the RentalPropertyJpaImpl bean");
     }
 
     @Override
     public List<RentalPropertyDTO> search(String name, String address, String city, String country, String zipCode) {
-
         StringBuilder sql = new StringBuilder("SELECT * FROM rental_properties WHERE 1=1");
-        MapSqlParameterSource params =  new MapSqlParameterSource();
+        MapSqlParameterSource params = new MapSqlParameterSource();
 
         if (StringUtils.hasText(name)) {
             sql.append(" AND name LIKE :name");
@@ -88,12 +84,27 @@ public class RentalPropertyServiceJdbcImpl implements RentalPropertyService {
             sql.append(" AND address LIKE :country");
             params.addValue("country", "%" + country + "%");
         }
-
         if (StringUtils.hasText(zipCode)) {
             sql.append(" AND address LIKE :zipCode");
             params.addValue("zipCode", "%" + zipCode + "%");
         }
-        return jdbcTemplate.query(
-                sql.toString(), params, rentalPropertyRowMapper);
+
+        return jdbcTemplate.query(sql.toString(), params, rentalPropertyRowMapper);
+    }
+
+    @Override
+    public void addScore(UUID propertyId) {
+        StringBuilder sql = new StringBuilder("UPDATE rental_properties SET score = score + 1 WHERE id=:propertyId");
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("propertyId", propertyId);
+
+        int rowsAffected = jdbcTemplate.update(sql.toString(), params);
+
+        if (rowsAffected > 0) {
+            System.out.println("Score updated successfully for property: " + propertyId);
+        } else {
+            System.out.println("No property found with ID: " + propertyId);
+        }
     }
 }
