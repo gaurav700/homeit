@@ -10,23 +10,26 @@ spring:
       ##### endpoints
       routes:
         - id: authprovider
-          uri: lb://authprovider
+          uri: lb://AUTH-SERVICE
           predicates:
             - Path=/auth/**
           filters:
             - StripPrefix=1
+
         - id: revoketoken
-          uri: lb://revoke-token-service
+          uri: lb://REVOKE-TOKEN-SERVICE
           predicates:
             - Path=/revoke/**
           filters:
             - StripPrefix=1
+
         - id: rentalproposal
-          uri: lb://rental-proposal-service
+          uri: lb://RENTAL-PROPOSAL-SERVICE
           predicates:
             - Path=/proposals/**
+
         - id: rentalproperties
-          uri: lb://rental-property-microservice
+          uri: lb://RENTAL-PROPERTY-MICROSERVICES
           predicates:
             - Path=/properties/**
           filters:
